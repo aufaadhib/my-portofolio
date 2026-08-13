@@ -37,14 +37,14 @@ export function PublicExperience({ children, locale }: { children: ReactNode; lo
       window.dispatchEvent(new Event("portfolio:reveal"));
     };
     if (firstVisit && !reduce) {
-      timeline.fromTo("[data-transition-mark]", { y: 24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .65, ease: "power3.out" })
-        .fromTo("[data-transition-progress]", { scaleX: 0 }, { scaleX: 1, duration: .95, ease: "power2.inOut" }, "-=.12")
-        .call(startPageMotion)
-        .to(overlay.current, { yPercent: -100, duration: .72, ease: "power4.inOut" }, "+=.16");
+      timeline.fromTo("[data-transition-mark]", { y: 28, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .82, ease: "power3.out" })
+        .fromTo("[data-transition-progress]", { scaleX: 0 }, { scaleX: 1, duration: 1.18, ease: "power2.inOut" }, "-=.1")
+        .to(overlay.current, { yPercent: -100, duration: 1.08, ease: "power4.inOut" }, "+=.28")
+        .call(startPageMotion, [], "+=.1");
     } else {
-      timeline.fromTo("[data-transition-progress]", { scaleX: 0 }, { scaleX: 1, duration: reduce ? .01 : .62, ease: "power2.inOut" })
-        .call(startPageMotion)
-        .to(overlay.current, { yPercent: -100, duration: reduce ? .01 : .58, ease: "power4.inOut" }, "+=.08");
+      timeline.fromTo("[data-transition-progress]", { scaleX: 0 }, { scaleX: 1, duration: reduce ? .01 : .82, ease: "power2.inOut" })
+        .to(overlay.current, { yPercent: -100, duration: reduce ? .01 : .9, ease: "power4.inOut" }, "+=.16")
+        .call(startPageMotion, [], reduce ? ">" : ">+.08");
     }
   }, []);
 
@@ -78,7 +78,7 @@ export function PublicExperience({ children, locale }: { children: ReactNode; lo
     gsap.set(overlay.current, { visibility: "visible", yPercent: 100 });
     gsap.set("[data-transition-mark]", { autoAlpha: 0 });
     gsap.set("[data-transition-progress]", { scaleX: 0 });
-    gsap.to(overlay.current, { yPercent: 0, duration: reduce ? .01 : .52, ease: "power4.inOut", onComplete: () => router.push(href) });
+    gsap.to(overlay.current, { yPercent: 0, duration: reduce ? .01 : .72, ease: "power4.inOut", onComplete: () => router.push(href) });
     safetyTimer.current = setTimeout(() => { pendingPath.current = null; reveal(false); }, 5000);
   }, [isAdmin, pathname, reveal, router]);
 

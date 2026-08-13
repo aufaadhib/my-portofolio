@@ -58,17 +58,17 @@ button, a { cursor: pointer; }
 .text-reveal { display: block; overflow: hidden; }
 .text-reveal > [data-page-intro] { display: block; }
 .page-motion:not(.is-revealed) [data-page-intro] { opacity: 0; visibility: hidden; transform: translate3d(0, 105%, 0); }
-.page-motion.is-revealed [data-page-intro] { opacity: 1; visibility: visible; transform: translate3d(0, 0, 0); transition: transform 1.15s cubic-bezier(.16, 1, .3, 1), opacity .9s ease, visibility 0s; }
+.page-motion.is-revealed [data-page-intro] { opacity: 1; visibility: visible; transform: translate3d(0, 0, 0); transition: transform 1.35s cubic-bezier(.16, 1, .3, 1), opacity 1.05s ease, visibility 0s; }
 .page-motion.is-revealed .hero-copy > [data-page-intro]:nth-child(2),
 .page-motion.is-revealed .section-heading .text-reveal:nth-child(2) > [data-page-intro],
 .page-motion.is-revealed .project-detail > .text-reveal:nth-of-type(2) > [data-page-intro],
-.page-motion.is-revealed .legal-page > .text-reveal:nth-of-type(2) > [data-page-intro] { transition-delay: .12s; }
+.page-motion.is-revealed .legal-page > .text-reveal:nth-of-type(2) > [data-page-intro] { transition-delay: .15s; }
 .page-motion.is-revealed .hero-copy > [data-page-intro]:nth-child(3),
 .page-motion.is-revealed .section-heading .text-reveal:nth-child(3) > [data-page-intro],
 .page-motion.is-revealed .project-detail > .text-reveal:nth-of-type(3) > [data-page-intro],
-.page-motion.is-revealed .legal-page > .text-reveal:nth-of-type(3) > [data-page-intro] { transition-delay: .24s; }
-.page-motion.is-revealed .hero-copy > [data-page-intro]:nth-child(4) { transition-delay: .36s; }
-.page-motion.is-revealed .hero-portrait[data-page-intro] { transition-delay: .3s; }
+.page-motion.is-revealed .legal-page > .text-reveal:nth-of-type(3) > [data-page-intro] { transition-delay: .3s; }
+.page-motion.is-revealed .hero-copy > [data-page-intro]:nth-child(4) { transition-delay: .45s; }
+.page-motion.is-revealed .hero-portrait[data-page-intro] { transition-delay: .36s; }
 .page-motion:not(.is-revealed) [data-rule] { transform: scaleX(0); transform-origin: left; }
 .page-motion.is-revealed [data-rule] { transform: scaleX(1); transform-origin: left; transition: transform 1.05s .42s cubic-bezier(.16, 1, .3, 1); }
 .section-heading .text-reveal-detail { grid-column: 2; margin-top: -22px; }
