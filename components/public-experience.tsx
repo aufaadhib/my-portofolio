@@ -7,12 +7,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, type MouseEvent, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MotionProvider } from "@/components/motion-provider";
 import { SiteHeader } from "@/components/site-header";
+import { copy, type Locale } from "@/lib/i18n";
 
 const STORAGE_KEY = "portfolio-intro-seen";
 const TransitionContext = createContext<(href: string) => void>(() => undefined);
 export const usePublicTransition = () => useContext(TransitionContext);
 
-export function PublicExperience({ children }: { children: ReactNode }) {
+export function PublicExperience({ children, locale }: { children: ReactNode; locale: Locale }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
   const router = useRouter();
@@ -114,10 +115,10 @@ export function PublicExperience({ children }: { children: ReactNode }) {
 
   if (isAdmin) return children;
   return <TransitionContext.Provider value={navigate}>
-    <div ref={overlay} className="page-transition" role="status" aria-live="polite" aria-label="Memuat halaman">
+    <div ref={overlay} className="page-transition" role="status" aria-live="polite" aria-label={copy[locale].loading}>
       <div className="page-transition-inner"><div data-transition-mark className="transition-mark"><span>FA</span><small>PORTFOLIO / 2026</small></div><div className="transition-progress"><span data-transition-progress /></div></div>
     </div>
-    <div ref={content} aria-busy="true"><a className="skip-link" href="#page-root">Lewati ke konten</a><MotionProvider><SiteHeader />{children}</MotionProvider></div>
+    <div ref={content} aria-busy="true"><a className="skip-link" href="#page-root">{copy[locale].skip}</a><MotionProvider><SiteHeader locale={locale} labels={copy[locale]} />{children}</MotionProvider></div>
   </TransitionContext.Provider>;
 }
 

@@ -6,20 +6,22 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import type { Project } from "@/lib/content";
 import { usePublicTransition } from "@/components/public-experience";
+import type { Locale } from "@/lib/i18n";
 
 const colors: Record<string, string> = { cyan: "#7bd5da", amber: "#e9a04b", lime: "#c7d66e" };
 
-function fallbackTexture(project: Project) {
+function fallbackTexture(project: Project, light: boolean) {
   const canvas = document.createElement("canvas"); canvas.width = 1024; canvas.height = 768;
   const context = canvas.getContext("2d")!; const accent = colors[project.accent] ?? colors.cyan;
-  context.fillStyle = "#151918"; context.fillRect(0, 0, 1024, 768); context.strokeStyle = accent; context.lineWidth = 2; context.strokeRect(74, 74, 876, 620);
+  context.fillStyle = light ? "#deddd7" : "#151918"; context.fillRect(0, 0, 1024, 768); context.strokeStyle = accent; context.lineWidth = 2; context.strokeRect(74, 74, 876, 620);
   context.save(); context.translate(512, 384); context.rotate(Math.PI / 4); context.strokeRect(-150, -150, 300, 300); context.restore();
   context.fillStyle = accent; context.font = "500 190px Arial"; context.textAlign = "center"; context.fillText(project.index, 512, 450);
-  context.fillStyle = "#f1f0eb"; context.font = "500 42px Arial"; context.fillText(project.title.toUpperCase(), 512, 660);
+  context.fillStyle = light ? "#111312" : "#f1f0eb"; context.font = "500 42px Arial"; context.fillText(project.title.toUpperCase(), 512, 660);
   const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; return texture;
 }
 
-export default function ProjectRotunda({ projects }: { projects: Project[] }) {
+export default function ProjectRotunda({ projects, locale = "id" }: { projects: Project[]; locale?: Locale }) {
+  void locale;
   const mount = useRef<HTMLDivElement>(null); const activeRef = useRef(0); const [active, setActive] = useState(0); const navigate = usePublicTransition();
   const select = useCallback((direction: number) => { activeRef.current = (activeRef.current + direction + projects.length) % projects.length; setActive(activeRef.current); }, [projects.length]);
 
@@ -34,7 +36,7 @@ export default function ProjectRotunda({ projects }: { projects: Project[] }) {
     const host = mount.current; if (!host) return;
     const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(38, 1, .1, 100); camera.position.set(0, .15, 9.4);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" }); renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.outputColorSpace = THREE.SRGBColorSpace; host.appendChild(renderer.domElement);
-    const group = new THREE.Group(); scene.add(group); const geometry = new THREE.PlaneGeometry(4.2, 3.15); const textures = projects.map(fallbackTexture); const loadedTextures: THREE.Texture[] = [];
+    const group = new THREE.Group(); scene.add(group); const geometry = new THREE.PlaneGeometry(4.2, 3.15); const light = document.documentElement.dataset.theme === "light"; const textures = projects.map((project) => fallbackTexture(project, light)); const loadedTextures: THREE.Texture[] = [];
     const meshes = textures.map((texture, index) => { const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: .94, side: THREE.FrontSide }); const mesh = new THREE.Mesh(geometry, material); mesh.userData.index = index; group.add(mesh); return mesh; });
     const loader = new THREE.TextureLoader(); projects.forEach((project, index) => { if (!project.heroImage) return; loader.load(project.heroImage.url, (texture) => { texture.colorSpace = THREE.SRGBColorSpace; loadedTextures.push(texture); const material = meshes[index].material as THREE.MeshBasicMaterial; material.map = texture; material.needsUpdate = true; }); });
     const step = Math.PI * 2 / projects.length; const radius = Math.max(5.2, projects.length * 1.05);

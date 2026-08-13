@@ -18,8 +18,12 @@ export const profile = {
   location: "Indonesia · tersedia untuk kolaborasi",
   email: "faufaadhib@gmail.com",
   intro:
-    "Full-Stack Web & Mobile Developer yang berfokus membangun pengalaman digital yang fungsional, responsif, dan nyaman digunakanâ€”dari antarmuka hingga backend.",
+    "Full-Stack Web & Mobile Developer yang berfokus membangun pengalaman digital yang fungsional, responsif, dan nyaman digunakan—dari antarmuka hingga backend.",
   availability: "Tersedia untuk proyek terpilih",
+  social: {
+    instagram: "https://www.instagram.com/aufaadhib/",
+    linkedin: "https://www.linkedin.com/in/farhanaufaadhib/",
+  },
 };
 
 export const projects: Project[] = [
@@ -67,17 +71,17 @@ export const projects: Project[] = [
 export const services = [
   {
     index: "S.01",
-    title: "Website yang terasa milik sendiri",
-    description: "Bangun halaman yang punya ritme, struktur, dan detail visual yang konsisten dengan identitas Anda.",
+    title: "Aplikasi web modern",
+    description: "Membangun website dan aplikasi web yang responsif, cepat, serta terhubung dengan kebutuhan bisnis dan pengguna.",
   },
   {
     index: "S.02",
-    title: "Front-end yang rapi",
-    description: "Komponen, layout responsif, dan implementasi yang mudah dipahami serta dirawat.",
+    title: "Aplikasi mobile",
+    description: "Mengembangkan pengalaman mobile yang fungsional dan nyaman digunakan untuk kebutuhan Android maupun iOS.",
   },
   {
     index: "S.03",
-    title: "Motion yang punya alasan",
-    description: "Animasi terukur untuk mengarahkan perhatian, memperjelas transisi, dan membuat pengalaman terasa hidup.",
+    title: "Backend dan integrasi",
+    description: "Menangani API, database, autentikasi, dan integrasi layanan agar aplikasi bekerja secara utuh dari depan hingga belakang.",
   },
 ];
