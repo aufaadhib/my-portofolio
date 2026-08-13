@@ -1,0 +1,24 @@
+import { z } from "zod";
+
+export const profilePayloadSchema = z.object({
+  name: z.string().min(1).max(120), role: z.string().min(1).max(160), location: z.string().max(160),
+  email: z.email(), intro: z.string().max(1200), availability: z.string().max(160),
+  socialLinks: z.array(z.object({ label: z.string().min(1).max(40), href: z.url() })).max(12),
+  portraitMediaId: z.string().nullable(), resumeMediaId: z.string().nullable(),
+  seoTitle: z.string().max(160), seoDescription: z.string().max(320),
+});
+
+export const projectPayloadSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), title: z.string().min(1).max(120),
+  category: z.string().max(120), year: z.string().max(20), summary: z.string().max(1000), role: z.string().max(240),
+  stack: z.array(z.string().min(1).max(60)).max(20), featured: z.boolean(), sortOrder: z.number().int(),
+  heroMediaId: z.string().nullable(), galleryMediaIds: z.array(z.string()).max(30), body: z.array(z.object({
+    type: z.enum(["paragraph", "heading", "list", "quote", "image", "link"]), text: z.string().max(5000),
+  })).max(100), liveUrl: z.url().nullable(), repositoryUrl: z.url().nullable(), seoTitle: z.string().max(160), seoDescription: z.string().max(320),
+});
+
+export const servicePayloadSchema = z.object({ index: z.string().max(20), title: z.string().min(1).max(160), description: z.string().max(1000), scope: z.array(z.string().max(300)).max(30), deliverables: z.array(z.string().max(300)).max(30), sortOrder: z.number().int(), visible: z.boolean() });
+export const settingsPayloadSchema = z.object({ siteName: z.string().min(1).max(120), siteUrl: z.url(), defaultTitle: z.string().max(160), defaultDescription: z.string().max(320), ogImageMediaId: z.string().nullable(), copyrightText: z.string().max(160), analyticsEnabled: z.boolean() });
+
+export const payloadSchemas = { PROFILE: profilePayloadSchema, PROJECT: projectPayloadSchema, SERVICE: servicePayloadSchema, SETTINGS: settingsPayloadSchema } as const;
+export type CmsKind = keyof typeof payloadSchemas;

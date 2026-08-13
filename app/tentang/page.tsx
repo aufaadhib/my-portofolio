@@ -1,0 +1,8 @@
+import Image from "next/image";
+import { SiteFooter } from "@/components/site-footer";
+import { SectionHeading } from "@/components/section-heading";
+import profileImage from "@/public/profile.jpeg";
+
+export default function AboutPage() {
+  return <><main className="page-shell interior-page about-page"><SectionHeading intro index="03 / PROFIL" title="Tentang Anda" detail="Halaman ini akan menjadi tempat untuk menjelaskan perjalanan, prinsip, dan cara Anda bekerja." /><div className="about-portrait" data-reveal><Image src={profileImage} alt="Portrait pemilik portofolio" fill sizes="(max-width: 800px) 100vw, 64vw" /></div><div className="about-layout"><div><p className="eyebrow">Pendekatan</p><h2>Bangun dari konteks, bukan dari template.</h2></div><div className="prose"><p>Tambahkan cerita profesional Anda di sini: bagaimana Anda bekerja, masalah apa yang Anda sukai, dan apa yang ingin dirasakan orang ketika membuka karya Anda.</p><p>Konten ini sengaja tidak diisi dengan fakta rekaan. Berikan bahan yang ingin dipublikasikan dan saya akan menyusunnya menjadi narasi yang jujur.</p></div></div><div className="principles"><article data-reveal><span className="eyebrow">A.01</span><h3>Jelas sebelum ramai</h3><p>Struktur dan hierarchy harus bekerja sebelum motion ditambahkan.</p></article><article data-reveal><span className="eyebrow">A.02</span><h3>Detail yang terasa</h3><p>Rasa visual tumbuh dari keputusan kecil yang konsisten.</p></article><article data-reveal><span className="eyebrow">A.03</span><h3>Teknologi sebagai alat</h3><p>Tools dipilih untuk melayani ide dan pengalaman.</p></article></div></main><SiteFooter /></>;
+}

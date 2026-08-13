@@ -1,0 +1,7 @@
+import { SiteFooter } from "@/components/site-footer";
+import { SectionHeading } from "@/components/section-heading";
+import { profile } from "@/lib/content";
+
+export default function ContactPage() {
+  return <><main className="page-shell interior-page contact-page"><SectionHeading intro index="05 / KONTAK" title="Mari mulai percakapan" detail="Untuk v1, email langsung menjadi jalur paling sederhana. Form terstruktur dapat ditambahkan setelah kebutuhan intake Anda jelas." /><div className="contact-layout"><div className="contact-card"><p className="eyebrow">Email</p><a className="contact-email" href={`mailto:${profile.email}`}>{profile.email}</a><p className="muted">{profile.location}</p></div><form className="contact-form"><label htmlFor="name">Nama<span>*</span></label><input id="name" name="name" autoComplete="name" placeholder="Nama Anda…" required /><label htmlFor="email">Email<span>*</span></label><input id="email" name="email" type="email" autoComplete="email" placeholder="nama@contoh.com…" required /><label htmlFor="message">Ceritakan singkat<span>*</span></label><textarea id="message" name="message" rows={6} placeholder="Apa yang ingin Anda bangun?…" required /><button className="button button-light" type="button">Kirim via email <span aria-hidden="true">↗</span></button><p className="placeholder-note" aria-live="polite">Pengiriman form akan dihubungkan setelah endpoint dan kebijakan privasi dipilih.</p></form></div></main><SiteFooter /></>;
+}

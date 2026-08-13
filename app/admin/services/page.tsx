@@ -1,0 +1,2 @@
+import { requireAdminPage } from "@/lib/server/admin";
+export default async function AdminServicesPage() { await requireAdminPage(); return <><p className="admin-kicker">CONTENT / SERVICES</p><h2>Layanan</h2><p className="admin-lead">Kelola layanan, scope, deliverables, dan urutan tampilan.</p><div className="admin-callout"><strong>Editor layanan</strong><p>Siapkan draft layanan setelah konten Anda diberikan.</p></div></>; }

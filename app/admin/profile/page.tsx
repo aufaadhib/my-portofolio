@@ -1,0 +1,2 @@
+import { requireAdminPage } from "@/lib/server/admin";
+export default async function AdminProfilePage() { await requireAdminPage(); return <><p className="admin-kicker">CONTENT / PROFILE</p><h2>Profil</h2><p className="admin-lead">Kelola profil terstruktur, kontak, sosial, dan metadata.</p><div className="admin-callout"><strong>Editor profil</strong><p>Siapkan draft profil setelah konten faktual Anda diberikan.</p></div></>; }

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String          @id
+  name          String
+  email         String          @unique
+  emailVerified Boolean         @default(false)
+  image         String?
+  role          String          @default("owner")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  revisions     ContentRevision[]
+  mediaAssets   MediaAsset[]
+  auditLogs     AuditLog[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Account {
+  id                    String   @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@index([identifier])
+}
+
+enum DocumentKind {
+  PROFILE
+  PROJECT
+  SERVICE
+  SETTINGS
+}
+
+enum RevisionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model ContentDocument {
+  id         String             @id @default(cuid())
+  kind       DocumentKind
+  slug       String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  revisions  ContentRevision[]
+  @@unique([kind, slug])
+}
+
+model ContentRevision {
+  id          String         @id @default(cuid())
+  documentId  String
+  version     Int
+  status      RevisionStatus @default(DRAFT)
+  payload     Json
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  publishedAt DateTime?
+  document    ContentDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdBy   User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  @@unique([documentId, version])
+  @@index([documentId, status])
+}
+
+model MediaAsset {
+  id          String   @id @default(cuid())
+  url         String
+  pathname    String   @unique
+  kind        String
+  alt         String
+  width       Int?
+  height      Int?
+  mimeType    String
+  size        Int
+  createdById String
+  createdAt   DateTime @default(now())
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  @@index([kind])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      User     @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+}

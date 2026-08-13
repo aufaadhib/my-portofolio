@@ -1,0 +1,4 @@
+import { notFound } from "next/navigation";
+import { requireAdminPage } from "@/lib/server/admin";
+import { requireDatabase } from "@/lib/server/db";
+export default async function ProjectEditorPage({ params }: { params: Promise<{ id: string }> }) { await requireAdminPage(); const { id } = await params; const item = await requireDatabase().contentDocument.findUnique({ where: { id }, include: { revisions: { orderBy: { version: "desc" }, take: 1 } } }); if (!item) notFound(); return <><p className="admin-kicker">CONTENT / PROJECT</p><h2>{item.slug}</h2><p className="admin-lead">Revision terbaru: {item.revisions[0]?.status ?? "DRAFT"}. Edit draft berikutnya melalui editor terstruktur.</p><div className="admin-callout"><strong>Draft tersimpan.</strong><p>Preview dan publish membutuhkan konten final yang sudah disetujui.</p></div></>; }

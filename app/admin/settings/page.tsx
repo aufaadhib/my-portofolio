@@ -1,0 +1,2 @@
+import { requireAdminPage } from "@/lib/server/admin";
+export default async function AdminSettingsPage() { await requireAdminPage(); return <><p className="admin-kicker">SYSTEM / SETTINGS</p><h2>Site settings</h2><p className="admin-lead">Kelola domain, metadata, OG image, copyright, dan analytics.</p><div className="admin-callout"><strong>Environment aman</strong><p>Secret deployment hanya melalui environment variables.</p></div></>; }

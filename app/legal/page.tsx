@@ -1,0 +1,3 @@
+import { SiteFooter } from "@/components/site-footer";
+
+export default function LegalPage() { return <><main className="page-shell interior-page legal-page"><div className="text-reveal"><p className="eyebrow" data-page-intro>— INFORMASI</p></div><div className="text-reveal"><h1 data-page-intro>Privasi & legal</h1></div><div className="text-reveal"><p className="detail-lead" data-page-intro>Halaman ini akan diisi setelah domain, analytics, jalur kontak, dan data publik disepakati.</p></div><div className="prose"><h2>Yang perlu ditentukan</h2><p>Siapa pengelola situs, data apa yang dikumpulkan, berapa lama disimpan, layanan pihak ketiga apa yang digunakan, dan bagaimana pengunjung dapat meminta penghapusan data.</p></div></main><SiteFooter /></>; }
