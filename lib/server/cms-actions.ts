@@ -29,5 +29,15 @@ export async function publishDraft(documentId: string, revisionId: string, kind:
     await tx.contentRevision.update({ where: { id: revisionId, documentId, status: "DRAFT" }, data: { status: "PUBLISHED", payload: parsed, publishedAt: new Date() } });
     await tx.auditLog.create({ data: { actorId: owner.id, action: "publish", entityType: "ContentRevision", entityId: revisionId, metadata: { kind } } });
   });
-  revalidatePath("/"); revalidatePath("/proyek"); revalidatePath("/layanan"); revalidatePath("/tentang"); revalidatePath("/sitemap.xml");
+  revalidatePath("/"); revalidatePath("/proyek"); revalidatePath("/layanan"); revalidatePath("/tentang"); revalidatePath("/kontak"); revalidatePath("/sitemap.xml");
+}
+
+export async function archiveDocument(documentId: string) {
+  const owner = await requireOwner();
+  const db = requireDatabase();
+  await db.$transaction(async (tx) => {
+    await tx.contentRevision.updateMany({ where: { documentId, status: { in: ["DRAFT", "PUBLISHED"] } }, data: { status: "ARCHIVED" } });
+    await tx.auditLog.create({ data: { actorId: owner.id, action: "archive", entityType: "ContentDocument", entityId: documentId } });
+  });
+  revalidatePath("/"); revalidatePath("/proyek"); revalidatePath("/layanan"); revalidatePath("/sitemap.xml");
 }
