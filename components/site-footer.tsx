@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { profile } from "@/lib/content";
 import { copy, type Locale } from "@/lib/i18n";
+import { getPublicContent } from "@/lib/server/content";
 
-export function SiteFooter({ locale = "id" }: { locale?: Locale }) {
+export async function SiteFooter({ locale = "id" }: { locale?: Locale }) {
+  const { profile } = await getPublicContent(locale);
   const t = copy[locale];
   const availability = locale === "en" ? "Available for selected projects" : profile.availability;
   const location = locale === "en" ? "Indonesia · available for collaboration" : profile.location;

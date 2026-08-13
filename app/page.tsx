@@ -9,7 +9,8 @@ import { getLocale } from "@/lib/server/locale";
 import profileImage from "@/public/profile.jpeg";
 
 export default async function Home() {
-  const [locale, { projects, profile, services }] = await Promise.all([getLocale(), getPublicContent()]);
+  const locale = await getLocale();
+  const { projects, profile, services } = await getPublicContent(locale);
   const t = copy[locale].home;
   const intro = locale === "en" ? "Full-Stack Web & Mobile Developer focused on building functional, responsive, and effortless digital experiences—from interface to backend." : profile.intro;
   const location = locale === "en" ? "Indonesia · available for collaboration" : profile.location;

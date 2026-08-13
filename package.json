@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "prisma migrate deploy",
+    "db:bootstrap-owner": "tsx scripts/bootstrap-owner.ts",
+    "db:seed-approved": "tsx scripts/seed-approved-content.ts",
+    "db:migrate-projects-bilingual": "tsx scripts/migrate-projects-bilingual.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

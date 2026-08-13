@@ -8,13 +8,18 @@ export const profilePayloadSchema = z.object({
   seoTitle: z.string().max(160), seoDescription: z.string().max(320),
 });
 
+const projectTranslationSchema = z.object({
+  title: z.string().min(1).max(120), category: z.string().max(120), summary: z.string().max(1000), role: z.string().max(240),
+  body: z.array(z.object({ type: z.enum(["paragraph", "heading", "list", "quote", "image", "link"]), text: z.string().max(5000) })).max(100),
+  seoTitle: z.string().max(160), seoDescription: z.string().max(320),
+});
+
 export const projectPayloadSchema = z.object({
-  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), title: z.string().min(1).max(120),
-  category: z.string().max(120), year: z.string().max(20), summary: z.string().max(1000), role: z.string().max(240),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  content: z.object({ id: projectTranslationSchema, en: projectTranslationSchema }), year: z.string().max(20),
   stack: z.array(z.string().min(1).max(60)).max(20), featured: z.boolean(), sortOrder: z.number().int(),
-  heroMediaId: z.string().nullable(), galleryMediaIds: z.array(z.string()).max(30), body: z.array(z.object({
-    type: z.enum(["paragraph", "heading", "list", "quote", "image", "link"]), text: z.string().max(5000),
-  })).max(100), liveUrl: z.url().nullable(), repositoryUrl: z.url().nullable(), seoTitle: z.string().max(160), seoDescription: z.string().max(320),
+  heroMediaId: z.string().nullable(), galleryMediaIds: z.array(z.string()).max(30),
+  liveUrl: z.url().nullable(), repositoryUrl: z.url().nullable(),
 });
 
 export const servicePayloadSchema = z.object({ index: z.string().max(20), title: z.string().min(1).max(160), description: z.string().max(1000), scope: z.array(z.string().max(300)).max(30), deliverables: z.array(z.string().max(300)).max(30), sortOrder: z.number().int(), visible: z.boolean() });
