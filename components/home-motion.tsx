@@ -3,15 +3,23 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /** Coordinates the home-page intro, section reveals, and desktop scroll choreography. */
 export function HomeMotion({ children }: { children: React.ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Do not let GSAP mutate server-rendered nodes during React hydration.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setHydrated(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useGSAP(() => {
+    if (!hydrated) return;
     const scope = root.current;
     if (!scope) return;
     const media = gsap.matchMedia();
@@ -20,18 +28,17 @@ export function HomeMotion({ children }: { children: React.ReactNode }) {
       const { desktop, reduce } = context.conditions as { desktop: boolean; mobile: boolean; reduce: boolean };
       const intro = gsap.utils.toArray<HTMLElement>("[data-home-intro]", scope);
       const revealImmediately = () => gsap.set(scope.querySelectorAll("[data-home-intro], [data-home-reveal], [data-home-card], [data-home-service], [data-home-footer]"), { clearProps: "all", autoAlpha: 1 });
-      if (reduce) { revealImmediately(); return; }
+      if (reduce) { window.__portfolioRevealPending = false; revealImmediately(); return; }
 
       gsap.set(intro, { yPercent: 105, autoAlpha: 0 });
-      gsap.set("[data-home-portrait-media]", { scale: 1.1, transformOrigin: "50% 50%" });
       gsap.set("[data-home-rule]", { scaleX: 0, transformOrigin: "0% 50%" });
       let introPlayed = false;
       const playIntro = () => {
         if (introPlayed) return;
         introPlayed = true;
+        window.__portfolioRevealPending = false;
         gsap.timeline({ defaults: { ease: "power3.out" } })
           .to(intro, { yPercent: 0, autoAlpha: 1, duration: desktop ? 1.15 : .82, stagger: desktop ? .12 : .08, clearProps: "transform,opacity,visibility" })
-          .to("[data-home-portrait-media]", { scale: 1.025, duration: 1.25, ease: "power4.out", clearProps: "transform" }, "-=.82")
           .to("[data-home-rule]", { scaleX: 1, duration: .95, ease: "power3.inOut", clearProps: "transform" }, "-=.9");
       };
       window.addEventListener("portfolio:reveal", playIntro, { once: true });
@@ -57,13 +64,13 @@ export function HomeMotion({ children }: { children: React.ReactNode }) {
 
       if (desktop) {
         gsap.to("[data-home-hero-copy]", { yPercent: -14, ease: "none", scrollTrigger: { trigger: "[data-home-hero]", start: "top top", end: "bottom top", scrub: .8 } });
-        scope.querySelectorAll<HTMLElement>("[data-home-image]").forEach((image) => gsap.fromTo(image, { scale: 1.08 }, { scale: 1, ease: "none", scrollTrigger: { trigger: image, start: "top bottom", end: "bottom top", scrub: .7 } }));
+        scope.querySelectorAll<HTMLElement>("[data-home-image-media]").forEach((image) => gsap.fromTo(image, { scale: 1.08 }, { scale: 1, ease: "none", scrollTrigger: { trigger: image.parentElement, start: "top bottom", end: "bottom top", scrub: .7 } }));
       }
       ScrollTrigger.refresh();
       return () => window.removeEventListener("portfolio:reveal", playIntro);
     });
     return () => media.revert();
-  }, { scope: root });
+  }, { scope: root, dependencies: [hydrated], revertOnUpdate: true });
 
   return <div ref={root} className="home-motion">{children}</div>;
 }

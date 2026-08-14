@@ -88,6 +88,7 @@ export function PublicExperience({ children, locale }: { children: ReactNode; lo
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     pendingPath.current = href;
     window.__portfolioPageReadyPath = undefined;
+    window.__portfolioRevealPending = false;
     content.current?.setAttribute("inert", "");
     content.current?.setAttribute("aria-busy", "true");
     gsap.set(overlay.current, { visibility: "visible", yPercent: 100 });
@@ -117,6 +118,7 @@ export function PublicExperience({ children, locale }: { children: ReactNode; lo
       if (!overlay.current) return;
       pendingPath.current = "history";
       window.__portfolioPageReadyPath = undefined;
+      window.__portfolioRevealPending = false;
       content.current?.setAttribute("inert", "");
       content.current?.setAttribute("aria-busy", "true");
       gsap.set(overlay.current, { visibility: "visible", yPercent: 0 });

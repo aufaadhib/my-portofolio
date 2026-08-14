@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePathname } from "next/navigation";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 type MotionVars = Parameters<typeof gsap.to>[1];
@@ -12,10 +12,19 @@ type MotionVars = Parameters<typeof gsap.to>[1];
 /** Coordinates one intro timeline and scroll reveals across non-home public routes. */
 export function PageMotion({ children }: { children: React.ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
+  const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
 
+  // GSAP must wait until React has completed hydration. CSS owns the initial
+  // hidden state, so there is no need for a pre-hydration inline gsap.set().
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setHydrated(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   useGSAP(() => {
+    if (!hydrated) return;
     const scope = root.current;
     if (!scope || isAdmin) return;
     let readyFrame = 0;
@@ -36,8 +45,8 @@ export function PageMotion({ children }: { children: React.ReactNode }) {
       if (window.__portfolioPageReadyPath === pathname) delete window.__portfolioPageReadyPath;
     };
     const media = gsap.matchMedia();
-    media.add({ desktop: "(min-width: 901px) and (pointer: fine)", reduce: "(prefers-reduced-motion: reduce)" }, (context) => {
-      const { desktop, reduce } = context.conditions as { desktop: boolean; reduce: boolean };
+    media.add({ desktop: "(min-width: 901px) and (pointer: fine)", mobile: "(max-width: 900px), (pointer: coarse)", reduce: "(prefers-reduced-motion: reduce)" }, (context) => {
+      const { desktop, reduce } = context.conditions as { desktop: boolean; mobile: boolean; reduce: boolean };
       const collect = () => ({
         intro: gsap.utils.toArray<HTMLElement>("[data-page-intro]", scope),
         reveals: gsap.utils.toArray<HTMLElement>("[data-reveal]", scope),
@@ -65,11 +74,13 @@ export function PageMotion({ children }: { children: React.ReactNode }) {
         }
         started = true;
         window.__portfolioRevealPending = false;
+        // Remove the CSS fallback transform before GSAP writes y/yPercent.
+        // Keeping both creates a stacked translate3d and causes visible jumps.
+        scope.classList.add("is-motion-ready");
         if (intro.length) gsap.set(intro, { yPercent: 105, autoAlpha: 0, force3D: true });
         if (reveals.length) gsap.set(reveals, { y: desktop ? 62 : 34, autoAlpha: 0, force3D: true });
         if (rules.length) gsap.set(rules, { scaleX: 0, transformOrigin: "0% 50%", force3D: true });
         if (mediaImages.length) gsap.set(mediaImages, { scale: 1.045, transformOrigin: "50% 50%", force3D: true });
-        scope.classList.add("is-motion-ready");
         const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
         if (intro.length) timeline.to(intro, { yPercent: 0, autoAlpha: 1, duration: desktop ? 1.15 : .82, stagger: desktop ? .12 : .08, overwrite: "auto", clearProps: "transform,opacity,visibility" });
         if (rules.length) timeline.to(rules, { scaleX: 1, duration: .95, ease: "power3.inOut", clearProps: "transform" }, intro.length ? "-=.9" : 0);
@@ -101,7 +112,7 @@ export function PageMotion({ children }: { children: React.ReactNode }) {
       if (window.__portfolioPageReadyPath === pathname) delete window.__portfolioPageReadyPath;
       media.revert();
     };
-  }, { scope: root, dependencies: [isAdmin, pathname], revertOnUpdate: true });
+  }, { scope: root, dependencies: [hydrated, isAdmin, pathname], revertOnUpdate: true });
 
   return <div ref={root} className="page-motion">{children}</div>;
 }
