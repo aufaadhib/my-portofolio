@@ -9,6 +9,8 @@ export type Project = {
   stack: string[];
   accent: string;
   description: string;
+  liveUrl?: string | null;
+  repositoryUrl?: string | null;
   heroImage?: { url: string; alt: string; width?: number; height?: number };
 };
 

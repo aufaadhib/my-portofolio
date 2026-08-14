@@ -22,7 +22,8 @@ export const projectPayloadSchema = z.object({
   liveUrl: z.url().nullable(), repositoryUrl: z.url().nullable(),
 });
 
-export const servicePayloadSchema = z.object({ index: z.string().max(20), title: z.string().min(1).max(160), description: z.string().max(1000), scope: z.array(z.string().max(300)).max(30), deliverables: z.array(z.string().max(300)).max(30), sortOrder: z.number().int(), visible: z.boolean() });
+const serviceTranslationSchema = z.object({ title: z.string().min(1).max(160), description: z.string().max(1000), scope: z.array(z.string().max(300)).max(30), deliverables: z.array(z.string().max(300)).max(30) });
+export const servicePayloadSchema = z.object({ index: z.string().max(20), content: z.object({ id: serviceTranslationSchema, en: serviceTranslationSchema }), sortOrder: z.number().int(), visible: z.boolean() });
 export const settingsPayloadSchema = z.object({ siteName: z.string().min(1).max(120), siteUrl: z.url(), defaultTitle: z.string().max(160), defaultDescription: z.string().max(320), ogImageMediaId: z.string().nullable(), copyrightText: z.string().max(160), analyticsEnabled: z.boolean() });
 
 export const payloadSchemas = { PROFILE: profilePayloadSchema, PROJECT: projectPayloadSchema, SERVICE: servicePayloadSchema, SETTINGS: settingsPayloadSchema } as const;
