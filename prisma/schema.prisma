@@ -67,6 +67,7 @@ enum DocumentKind {
   PROFILE
   PROJECT
   SERVICE
+  CERTIFICATE
   SETTINGS
 }
 

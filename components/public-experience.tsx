@@ -61,18 +61,33 @@ export function PublicExperience({ children, locale }: { children: ReactNode; lo
 
   useEffect(() => {
     if (!ready || pendingPath.current === null) return;
-    pendingPath.current = null;
-    reveal(false);
-    requestAnimationFrame(() => {
+    let focusFrame = 0;
+    const finishNavigation = () => {
+      if (pendingPath.current === null) return;
+      pendingPath.current = null;
+      reveal(false);
+      focusFrame = requestAnimationFrame(() => {
       const main = document.querySelector<HTMLElement>("#page-root main");
       if (main) { main.tabIndex = -1; main.focus({ preventScroll: true }); }
-    });
+      });
+    };
+    const handlePageReady = (event: Event) => {
+      const readyPath = (event as CustomEvent<{ pathname: string }>).detail.pathname;
+      if (readyPath === pathname) finishNavigation();
+    };
+    window.addEventListener("portfolio:page-ready", handlePageReady);
+    if (window.__portfolioPageReadyPath === pathname) finishNavigation();
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      window.removeEventListener("portfolio:page-ready", handlePageReady);
+    };
   }, [pathname, ready, reveal]);
 
   const navigate = useCallback((href: string) => {
     if (isAdmin || !overlay.current || href === pathname) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     pendingPath.current = href;
+    window.__portfolioPageReadyPath = undefined;
     content.current?.setAttribute("inert", "");
     content.current?.setAttribute("aria-busy", "true");
     gsap.set(overlay.current, { visibility: "visible", yPercent: 100 });
@@ -101,6 +116,7 @@ export function PublicExperience({ children, locale }: { children: ReactNode; lo
     const handleHistory = () => {
       if (!overlay.current) return;
       pendingPath.current = "history";
+      window.__portfolioPageReadyPath = undefined;
       content.current?.setAttribute("inert", "");
       content.current?.setAttribute("aria-busy", "true");
       gsap.set(overlay.current, { visibility: "visible", yPercent: 0 });

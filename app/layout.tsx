@@ -9,7 +9,7 @@ const plexMono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], we
 
 export const metadata: Metadata = { metadataBase: new URL("https://example.com"), title: { default: "Farhan Aufa Adhib — Full-Stack Developer", template: "%s · Farhan Aufa Adhib" }, description: "Full-Stack Web & Mobile Developer.", robots: { index: true, follow: true }, openGraph: { type: "website", title: "Farhan Aufa Adhib — Full-Stack Developer", description: "Full-Stack Web & Mobile Developer." } };
 
-const themeScript = `try{document.documentElement.dataset.theme=localStorage.getItem('portfolio-theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}`;
+const themeScript = `document.documentElement.classList.add('js');try{document.documentElement.dataset.theme=localStorage.getItem('portfolio-theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}`;
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();

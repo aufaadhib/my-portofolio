@@ -24,7 +24,10 @@ export const projectPayloadSchema = z.object({
 
 const serviceTranslationSchema = z.object({ title: z.string().min(1).max(160), description: z.string().max(1000), scope: z.array(z.string().max(300)).max(30), deliverables: z.array(z.string().max(300)).max(30) });
 export const servicePayloadSchema = z.object({ index: z.string().max(20), content: z.object({ id: serviceTranslationSchema, en: serviceTranslationSchema }), sortOrder: z.number().int(), visible: z.boolean() });
+const resourceUrlSchema = z.string().max(2000).refine((value) => !value || value.startsWith("/certificate/") || URL.canParse(value) && new URL(value).protocol === "https:", "Gunakan URL HTTPS atau path /certificate/");
+const certificateTranslationSchema = z.object({ title: z.string().min(1).max(200), issuer: z.string().max(160) });
+export const certificatePayloadSchema = z.object({ content: z.object({ id: certificateTranslationSchema, en: certificateTranslationSchema }), year: z.string().max(20), imageMediaId: z.string().nullable(), credentialMediaId: z.string().nullable(), imageUrl: resourceUrlSchema, credentialUrl: resourceUrlSchema, sortOrder: z.number().int(), visible: z.boolean() }).refine((value) => value.imageMediaId || value.imageUrl, { message: "Pilih media atau isi path gambar" });
 export const settingsPayloadSchema = z.object({ siteName: z.string().min(1).max(120), siteUrl: z.url(), defaultTitle: z.string().max(160), defaultDescription: z.string().max(320), ogImageMediaId: z.string().nullable(), copyrightText: z.string().max(160), analyticsEnabled: z.boolean() });
 
-export const payloadSchemas = { PROFILE: profilePayloadSchema, PROJECT: projectPayloadSchema, SERVICE: servicePayloadSchema, SETTINGS: settingsPayloadSchema } as const;
+export const payloadSchemas = { PROFILE: profilePayloadSchema, PROJECT: projectPayloadSchema, SERVICE: servicePayloadSchema, CERTIFICATE: certificatePayloadSchema, SETTINGS: settingsPayloadSchema } as const;
 export type CmsKind = keyof typeof payloadSchemas;

@@ -11,6 +11,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:bootstrap-owner": "tsx scripts/bootstrap-owner.ts",
     "db:seed-approved": "tsx scripts/seed-approved-content.ts",
+    "db:seed-certificates": "tsx scripts/seed-certificates.ts",
+    "db:upload-certificates": "tsx scripts/upload-certificate-assets.ts",
     "db:migrate-projects-bilingual": "tsx scripts/migrate-projects-bilingual.ts"
   },
   "dependencies": {
