@@ -299,10 +299,13 @@ button, a { cursor: pointer; }
 .admin-actions .button-outline:hover, .admin-actions .button-outline:focus-visible { background: var(--admin-text); color: var(--admin-bg); }
 .admin-actions .button-light { border-color: var(--admin-text); background: var(--admin-text); color: var(--admin-bg); }
 .admin-actions .button-light:hover, .admin-actions .button-light:focus-visible { border-color: var(--admin-accent); background: var(--admin-accent); color: var(--admin-bg); }
-.admin-actions button:disabled { cursor: not-allowed; opacity: .55; }
+.admin-actions button:disabled, .admin-callout button:disabled, .admin-callout input:disabled, .admin-danger:disabled { cursor: not-allowed; opacity: .55; }
 .admin-danger, .admin-logout { min-height: 44px; border: 1px solid #9d4238; padding: 0 16px; color: #8c2e26; }
 .admin-sidebar-actions { display: grid; gap: 8px; margin-top: auto; }
 .admin-logout { width: 100%; }
+.admin-logout-error { margin: 0; color: var(--amber); font-size: 11px; line-height: 1.4; }
+.admin-spinner { display: inline-block; width: 14px; height: 14px; flex: 0 0 auto; border: 2px solid var(--admin-line); border-top-color: var(--admin-accent); border-radius: 50%; animation: admin-spin .75s linear infinite; }
+@keyframes admin-spin { to { transform: rotate(360deg); } }
 .admin-theme-toggle { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--admin-line); padding: 0 14px; color: var(--admin-text); font-size: 12px; }
 .admin-theme-toggle:hover, .admin-theme-toggle:focus-visible { border-color: var(--admin-accent); color: var(--admin-accent); }
 .admin-sidebar { display: flex; flex-direction: column; }
