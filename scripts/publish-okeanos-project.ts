@@ -9,65 +9,56 @@ import { projectPayloadSchema } from "../lib/validation/cms";
 neonConfig.webSocketConstructor = ws;
 
 const payload = projectPayloadSchema.parse({
-  slug: "glutong-pos",
+  slug: "okeanos-landingpage",
   year: "2026",
+  stack: ["React", "Vite", "Tailwind CSS", "Responsive Design"],
   featured: true,
-  sortOrder: 1,
-  stack: [
-    "Next.js 16",
-    "React 19",
-    "TypeScript",
-    "Tailwind CSS 4",
-    "Prisma 7",
-    "PostgreSQL",
-    "Better Auth",
-    "Vercel Blob",
-  ],
+  sortOrder: 2,
   heroMediaId: null,
   galleryMediaIds: [],
-  liveUrl: "https://glutong.vercel.app/pos",
-  repositoryUrl: null,
+  liveUrl: null,
+  repositoryUrl: "https://github.com/aufaadhib/okeanos-landingpage",
   content: {
     id: {
-      title: "Glutong POS",
-      category: "Aplikasi Point of Sale",
-      role: "Pengembang Web Full-Stack",
+      title: "Okeanos Landing Page",
+      category: "Pengembangan Landing Page Korporat",
+      role: "Frontend Developer",
       summary:
-        "Platform POS multi-outlet untuk operasional kafe dan restoran, menghubungkan transaksi kasir, pesanan dapur, katalog, laporan, shift, dan manajemen tenaga kerja dalam satu sistem responsif.",
+        "Landing page korporat responsif untuk memperkenalkan Okeanos, layanan, divisi, portofolio, berita, dan materi video dalam satu pengalaman digital.",
       body: [
         {
           type: "paragraph",
-          text: "Glutong POS merupakan platform operasional kafe dan restoran yang dirancang untuk melayani kebutuhan kasir, manajer, dan pemilik. Saya mengembangkan sistem full-stack yang mencakup katalog serta harga per outlet, transaksi dan open order, antrean dapur, pembayaran, shift kas, laporan operasional, pengaturan struk, dan rekonsiliasi platform delivery. Sistem juga dilengkapi kontrol akses berbasis peran serta modul absensi wajah dan lokasi, roster staf, dan audit perubahan untuk menjaga alur kerja tetap terkontrol.",
+          text: "Okeanos Landing Page adalah website korporat berbasis React dan Vite yang menyusun informasi Okeanos ke dalam bagian profil, layanan, ekosistem divisi, portofolio, berita, dan video. Saya membangun struktur antarmuka responsif dengan Tailwind CSS, navigasi antarbagian, halaman detail portofolio dan berita, serta dukungan media visual untuk membantu pengunjung memahami layanan dan aktivitas Okeanos.",
         },
       ],
-      seoTitle: "Glutong POS - Platform Operasional Kafe dan Restoran",
+      seoTitle: "Okeanos Landing Page - Website Korporat React",
       seoDescription:
-        "Pengembangan full-stack aplikasi POS multi-outlet dengan transaksi kasir, kitchen ticket, laporan, shift, katalog, dan manajemen tenaga kerja.",
+        "Landing page korporat Okeanos berbasis React dan Vite dengan informasi layanan, divisi, portofolio, berita, dan video yang responsif.",
     },
     en: {
-      title: "Glutong POS",
-      category: "Point of Sale Application",
-      role: "Full-Stack Web Developer",
+      title: "Okeanos Landing Page",
+      category: "Corporate Landing Page Development",
+      role: "Frontend Developer",
       summary:
-        "A multi-outlet POS platform for cafés and restaurants, connecting checkout, kitchen orders, catalogs, reporting, shifts, and workforce operations in one responsive system.",
+        "A responsive corporate landing page introducing Okeanos, its services, divisions, portfolio, news, and video content in one digital experience.",
       body: [
         {
           type: "paragraph",
-          text: "Glutong POS is an operations platform built for café and restaurant cashiers, managers, and owners. I developed the full-stack system covering outlet-specific catalogs and pricing, transactions and open orders, kitchen queues, payments, cash shifts, operational reports, receipt settings, and delivery-platform reconciliation. The system also includes role-based access control, face-and-location attendance, staff rosters, and audit trails to keep daily operations controlled and traceable.",
+          text: "Okeanos Landing Page is a React and Vite corporate website that organizes Okeanos content into profile, services, ecosystem divisions, portfolio, news, and video sections. I built the responsive interface structure with Tailwind CSS, section navigation, portfolio and news detail views, and visual media support to help visitors understand Okeanos services and activities.",
         },
       ],
-      seoTitle: "Glutong POS - Café and Restaurant Operations Platform",
+      seoTitle: "Okeanos Landing Page - React Corporate Website",
       seoDescription:
-        "Full-stack development of a multi-outlet POS application with checkout, kitchen tickets, reporting, shifts, catalogs, and workforce management.",
+        "A responsive React and Vite corporate landing page for Okeanos featuring services, divisions, portfolio, news, and video content.",
     },
   },
 });
 
-/** Publishes an idempotent CMS revision for the approved Glutong POS project. */
-async function publishGlutongProject() {
+async function publishProject() {
   const connectionString = process.env.DATABASE_URL;
   const email = process.env.CMS_OWNER_EMAIL?.trim().toLowerCase();
   if (!connectionString || !email) throw new Error("DATABASE_URL and CMS_OWNER_EMAIL are required");
+
   const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
   try {
     const owner = await prisma.user.findUniqueOrThrow({ where: { email }, select: { id: true } });
@@ -79,6 +70,7 @@ async function publishGlutongProject() {
         document = await tx.contentDocument.create({
           data: { kind: "PROJECT", slug: payload.slug },
         });
+
       const latest = await tx.contentRevision.findFirst({
         where: { documentId: document.id },
         orderBy: { version: "desc" },
@@ -86,6 +78,7 @@ async function publishGlutongProject() {
       });
       if (latest && isDeepStrictEqual(latest.payload, payload))
         return { documentId: document.id, version: latest.version, unchanged: true };
+
       await tx.contentRevision.updateMany({
         where: { documentId: document.id, status: "PUBLISHED" },
         data: { status: "ARCHIVED" },
@@ -106,7 +99,11 @@ async function publishGlutongProject() {
           action: "publish_project",
           entityType: "ContentRevision",
           entityId: revision.id,
-          metadata: { kind: "PROJECT", slug: payload.slug },
+          metadata: {
+            kind: "PROJECT",
+            slug: payload.slug,
+            source: "local:React-Standart/okeanos-landingpage",
+          },
         },
       });
       return {
@@ -121,7 +118,7 @@ async function publishGlutongProject() {
   }
 }
 
-publishGlutongProject()
+publishProject()
   .then((result) => console.log(JSON.stringify(result)))
   .catch((error) => {
     console.error(error);

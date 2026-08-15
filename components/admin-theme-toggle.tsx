@@ -6,5 +6,15 @@ export function AdminThemeToggle() {
     document.documentElement.dataset.theme = next;
     localStorage.setItem("portfolio-theme", next);
   }
-  return <button className="admin-theme-toggle" type="button" onClick={toggleTheme} aria-label="Ganti tema dashboard"><span aria-hidden="true">◐</span><span>Ganti tema</span></button>;
+  return (
+    <button
+      className="admin-theme-toggle"
+      type="button"
+      onClick={toggleTheme}
+      aria-label="Ganti tema dashboard"
+    >
+      <span aria-hidden="true">◐</span>
+      <span>Ganti tema</span>
+    </button>
+  );
 }

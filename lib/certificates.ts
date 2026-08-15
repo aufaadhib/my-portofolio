@@ -10,7 +10,10 @@ export const fallbackCertificates = [
   "Sertim BEM",
 ].map((title, sortOrder) => ({
   title,
-  image: `/certificate/previews/${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.jpg`,
+  image: `/certificate/previews/${title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}.jpg`,
   document: `/certificate/${encodeURIComponent(title)}.pdf`,
   sortOrder,
 }));

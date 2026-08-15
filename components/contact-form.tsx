@@ -29,5 +29,47 @@ export function ContactForm({ recipient, labels }: ContactFormProps) {
     window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
-  return <form className="contact-form" onSubmit={submit}><label htmlFor="name">{labels.name}<span>*</span></label><input id="name" name="name" autoComplete="name" placeholder={labels.namePlaceholder} required /><label htmlFor="email">Email<span>*</span></label><input id="email" name="email" type="email" autoComplete="email" placeholder="name@example.com…" required /><label htmlFor="message">{labels.message}<span>*</span></label><textarea id="message" name="message" rows={6} placeholder={labels.messagePlaceholder} required /><button className="button button-light" type="submit">{labels.send} <span aria-hidden="true">↗</span></button><p className="placeholder-note" aria-live="polite">{status || labels.pending}</p></form>;
+  return (
+    <form className="contact-form" onSubmit={submit}>
+      <label htmlFor="name">
+        {labels.name}
+        <span>*</span>
+      </label>
+      <input
+        id="name"
+        name="name"
+        autoComplete="name"
+        placeholder={labels.namePlaceholder}
+        required
+      />
+      <label htmlFor="email">
+        Email<span>*</span>
+      </label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        placeholder="name@example.com…"
+        required
+      />
+      <label htmlFor="message">
+        {labels.message}
+        <span>*</span>
+      </label>
+      <textarea
+        id="message"
+        name="message"
+        rows={6}
+        placeholder={labels.messagePlaceholder}
+        required
+      />
+      <button className="button button-light" type="submit">
+        {labels.send} <span aria-hidden="true">↗︎</span>
+      </button>
+      <p className="placeholder-note" aria-live="polite">
+        {status || labels.pending}
+      </p>
+    </form>
+  );
 }

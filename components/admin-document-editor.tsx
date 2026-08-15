@@ -4,13 +4,365 @@ import { useRouter } from "next/navigation";
 import { archiveDocument, publishDraft, saveDraft } from "@/lib/server/cms-actions";
 import type { CmsKind } from "@/lib/validation/cms";
 
-export function AdminDocumentEditor({ kind, slug, documentId, initial, media = [] }: { kind: Exclude<CmsKind, "PROJECT">; slug: string; documentId?: string; initial?: Record<string, unknown>; media?: { id: string; alt: string }[] }) {
-  const router = useRouter(); const [busy, setBusy] = useState(false); const [message, setMessage] = useState("");
+export function AdminDocumentEditor({
+  kind,
+  slug,
+  documentId,
+  initial,
+  media = [],
+}: {
+  kind: Exclude<CmsKind, "PROJECT">;
+  slug: string;
+  documentId?: string;
+  initial?: Record<string, unknown>;
+  media?: { id: string; alt: string }[];
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
   const field = (name: string) => String(initial?.[name] ?? "");
-  async function submit(form: FormData) { setBusy(true); setMessage(""); try { let payload: unknown; if (kind === "PROFILE") payload = { name: String(form.get("name")), role: String(form.get("role")), location: String(form.get("location")), email: String(form.get("email")), intro: String(form.get("intro")), availability: String(form.get("availability")), socialLinks: [{ label: "Instagram", href: String(form.get("instagram")) }, { label: "LinkedIn", href: String(form.get("linkedin")) }].filter((link) => link.href), portraitMediaId: String(form.get("portraitMediaId") || "") || null, resumeMediaId: null, seoTitle: String(form.get("seoTitle")), seoDescription: String(form.get("seoDescription")) }; else if (kind === "SERVICE") { const localized = (locale: "id" | "en") => ({ title: String(form.get(`${locale}Title`)), description: String(form.get(`${locale}Description`)), scope: String(form.get(`${locale}Scope`)).split("\n").map((value) => value.trim()).filter(Boolean), deliverables: String(form.get(`${locale}Deliverables`)).split("\n").map((value) => value.trim()).filter(Boolean) }); payload = { index: String(form.get("index")), content: { id: localized("id"), en: localized("en") }, sortOrder: Number(form.get("sortOrder") || 0), visible: form.get("visible") === "on" }; } else if (kind === "CERTIFICATE") { const localized = (locale: "id" | "en") => ({ title: String(form.get(`${locale}Title`)), issuer: String(form.get(`${locale}Issuer`)) }); payload = { content: { id: localized("id"), en: localized("en") }, year: String(form.get("year")), imageMediaId: String(form.get("imageMediaId") || "") || null, credentialMediaId: String(form.get("credentialMediaId") || "") || null, imageUrl: String(form.get("imageUrl")), credentialUrl: String(form.get("credentialUrl")), sortOrder: Number(form.get("sortOrder") || 0), featured: form.get("featured") === "on", visible: form.get("visible") === "on" }; } else payload = { siteName: String(form.get("siteName")), siteUrl: String(form.get("siteUrl")), defaultTitle: String(form.get("defaultTitle")), defaultDescription: String(form.get("defaultDescription")), ogImageMediaId: String(form.get("ogImageMediaId") || "") || null, copyrightText: String(form.get("copyrightText")), analyticsEnabled: form.get("analyticsEnabled") === "on" }; const result = await saveDraft(kind, documentId ?? null, slug, payload); if (form.get("intent") === "publish") await publishDraft(result.documentId, result.revisionId, kind, payload); setMessage(form.get("intent") === "publish" ? "Perubahan berhasil diterbitkan." : "Draft berhasil disimpan."); if (kind === "SERVICE") router.push(`/admin/services?edit=${result.documentId}`); if (kind === "CERTIFICATE") router.push(`/admin/certificates?edit=${result.documentId}`); router.refresh(); } catch { setMessage("Gagal menyimpan. Periksa kembali semua input."); } finally { setBusy(false); } }
-  async function archive() { if (!documentId || !confirm("Arsipkan konten ini dari situs publik?")) return; setBusy(true); await archiveDocument(documentId); router.push(kind === "CERTIFICATE" ? "/admin/certificates" : "/admin/services"); router.refresh(); }
+  async function submit(form: FormData) {
+    setBusy(true);
+    setMessage("");
+    try {
+      let payload: unknown;
+      if (kind === "PROFILE")
+        payload = {
+          name: String(form.get("name")),
+          role: String(form.get("role")),
+          location: String(form.get("location")),
+          email: String(form.get("email")),
+          intro: String(form.get("intro")),
+          availability: String(form.get("availability")),
+          socialLinks: [
+            { label: "Instagram", href: String(form.get("instagram")) },
+            { label: "LinkedIn", href: String(form.get("linkedin")) },
+          ].filter((link) => link.href),
+          portraitMediaId: String(form.get("portraitMediaId") || "") || null,
+          resumeMediaId: null,
+          seoTitle: String(form.get("seoTitle")),
+          seoDescription: String(form.get("seoDescription")),
+        };
+      else if (kind === "SERVICE") {
+        const localized = (locale: "id" | "en") => ({
+          title: String(form.get(`${locale}Title`)),
+          description: String(form.get(`${locale}Description`)),
+          scope: String(form.get(`${locale}Scope`))
+            .split("\n")
+            .map((value) => value.trim())
+            .filter(Boolean),
+          deliverables: String(form.get(`${locale}Deliverables`))
+            .split("\n")
+            .map((value) => value.trim())
+            .filter(Boolean),
+        });
+        payload = {
+          index: String(form.get("index")),
+          content: { id: localized("id"), en: localized("en") },
+          sortOrder: Number(form.get("sortOrder") || 0),
+          visible: form.get("visible") === "on",
+        };
+      } else if (kind === "CERTIFICATE") {
+        const localized = (locale: "id" | "en") => ({
+          title: String(form.get(`${locale}Title`)),
+          issuer: String(form.get(`${locale}Issuer`)),
+        });
+        payload = {
+          content: { id: localized("id"), en: localized("en") },
+          year: String(form.get("year")),
+          imageMediaId: String(form.get("imageMediaId") || "") || null,
+          credentialMediaId: String(form.get("credentialMediaId") || "") || null,
+          imageUrl: String(form.get("imageUrl")),
+          credentialUrl: String(form.get("credentialUrl")),
+          sortOrder: Number(form.get("sortOrder") || 0),
+          featured: form.get("featured") === "on",
+          visible: form.get("visible") === "on",
+        };
+      } else
+        payload = {
+          siteName: String(form.get("siteName")),
+          siteUrl: String(form.get("siteUrl")),
+          defaultTitle: String(form.get("defaultTitle")),
+          defaultDescription: String(form.get("defaultDescription")),
+          ogImageMediaId: String(form.get("ogImageMediaId") || "") || null,
+          copyrightText: String(form.get("copyrightText")),
+          analyticsEnabled: form.get("analyticsEnabled") === "on",
+        };
+      const result = await saveDraft(kind, documentId ?? null, slug, payload);
+      if (form.get("intent") === "publish")
+        await publishDraft(result.documentId, result.revisionId, kind, payload);
+      setMessage(
+        form.get("intent") === "publish"
+          ? "Perubahan berhasil diterbitkan."
+          : "Draft berhasil disimpan.",
+      );
+      if (kind === "SERVICE") router.push(`/admin/services?edit=${result.documentId}`);
+      if (kind === "CERTIFICATE") router.push(`/admin/certificates?edit=${result.documentId}`);
+      router.refresh();
+    } catch {
+      setMessage("Gagal menyimpan. Periksa kembali semua input.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function archive() {
+    if (!documentId || !confirm("Arsipkan konten ini dari situs publik?")) return;
+    setBusy(true);
+    await archiveDocument(documentId);
+    router.push(kind === "CERTIFICATE" ? "/admin/certificates" : "/admin/services");
+    router.refresh();
+  }
   const links = (initial?.socialLinks as { label: string; href: string }[] | undefined) ?? [];
-  const serviceContent = initial?.content as Record<"id" | "en", { title?: string; description?: string; scope?: string[]; deliverables?: string[] }> | undefined;
-  const certificateContent = initial?.content as Record<"id" | "en", { title?: string; issuer?: string }> | undefined;
-  return <form className="admin-callout admin-editor" action={submit}>{kind === "PROFILE" ? <><div className="admin-form-grid"><label>Nama<input name="name" defaultValue={field("name")} required /></label><label>Peran<input name="role" defaultValue={field("role")} required /></label><label>Lokasi<input name="location" defaultValue={field("location")} /></label><label>Email<input name="email" type="email" defaultValue={field("email")} required /></label><label>Instagram<input name="instagram" type="url" defaultValue={links.find((link) => link.label === "Instagram")?.href} /></label><label>LinkedIn<input name="linkedin" type="url" defaultValue={links.find((link) => link.label === "LinkedIn")?.href} /></label></div><label>Intro<textarea name="intro" defaultValue={field("intro")} /></label><label>Ketersediaan<input name="availability" defaultValue={field("availability")} /></label><label>Foto profil<select name="portraitMediaId" defaultValue={field("portraitMediaId")}><option value="">Gunakan foto lokal</option>{media.map((asset) => <option key={asset.id} value={asset.id}>{asset.alt}</option>)}</select></label><label>SEO title<input name="seoTitle" defaultValue={field("seoTitle")} /></label><label>SEO description<textarea name="seoDescription" defaultValue={field("seoDescription")} /></label></> : kind === "SERVICE" ? <><div className="admin-form-grid"><label>Nomor/index<input name="index" defaultValue={field("index")} /></label><label>Urutan<input name="sortOrder" type="number" defaultValue={Number(initial?.sortOrder ?? 0)} /></label></div>{(["id", "en"] as const).map((locale) => { const value = serviceContent?.[locale]; return <fieldset key={locale}><legend>{locale === "id" ? "Bahasa Indonesia" : "English"}</legend><label>Judul<input name={`${locale}Title`} defaultValue={value?.title} required /></label><label>Deskripsi<textarea name={`${locale}Description`} defaultValue={value?.description} required /></label><label>Scope — satu per baris<textarea name={`${locale}Scope`} defaultValue={value?.scope?.join("\n")} /></label><label>Deliverables — satu per baris<textarea name={`${locale}Deliverables`} defaultValue={value?.deliverables?.join("\n")} /></label></fieldset>})}<label className="admin-check"><input type="checkbox" name="visible" defaultChecked={initial?.visible !== false} /> Tampilkan di situs</label></> : kind === "CERTIFICATE" ? <><input type="hidden" name="credentialMediaId" value={field("credentialMediaId")} /><div className="admin-form-grid"><label>Tahun<input name="year" defaultValue={field("year")} /></label><label>Urutan<input name="sortOrder" type="number" defaultValue={Number(initial?.sortOrder ?? 0)} /></label></div><label>Gambar dari media<select name="imageMediaId" defaultValue={field("imageMediaId")}><option value="">Gunakan path gambar di bawah</option>{media.map((asset) => <option key={asset.id} value={asset.id}>{asset.alt}</option>)}</select></label><label>Path gambar lokal<input name="imageUrl" defaultValue={field("imageUrl")} placeholder="/certificate/previews/nama.jpg" /></label><label>URL PDF atau kredensial<input name="credentialUrl" defaultValue={field("credentialUrl")} placeholder="https://… atau /certificate/nama.pdf" /></label>{(["id", "en"] as const).map((locale) => { const value = certificateContent?.[locale]; return <fieldset key={locale}><legend>{locale === "id" ? "Bahasa Indonesia" : "English"}</legend><label>Judul<input name={`${locale}Title`} defaultValue={value?.title} required /></label><label>Penerbit<input name={`${locale}Issuer`} defaultValue={value?.issuer} /></label></fieldset>})}<label className="admin-check"><input type="checkbox" name="visible" defaultChecked={initial?.visible !== false} /> Tampilkan di situs</label></> : <><div className="admin-form-grid"><label>Nama situs<input name="siteName" defaultValue={field("siteName")} required /></label><label>URL situs<input name="siteUrl" type="url" defaultValue={field("siteUrl")} required /></label><label>Default title<input name="defaultTitle" defaultValue={field("defaultTitle")} /></label><label>Copyright<input name="copyrightText" defaultValue={field("copyrightText")} /></label></div><label>Default description<textarea name="defaultDescription" defaultValue={field("defaultDescription")} /></label><label>OG image<select name="ogImageMediaId" defaultValue={field("ogImageMediaId")}><option value="">Belum dipilih</option>{media.map((asset) => <option key={asset.id} value={asset.id}>{asset.alt}</option>)}</select></label><label className="admin-check"><input type="checkbox" name="analyticsEnabled" defaultChecked={initial?.analyticsEnabled === true} /> Aktifkan analytics</label></>}<div className="admin-actions"><button className="button button-outline" name="intent" value="draft" disabled={busy}>Simpan draft</button><button className="button button-light" name="intent" value="publish" disabled={busy}>{busy ? "Memproses…" : "Simpan & terbitkan"}</button>{(kind === "SERVICE" || kind === "CERTIFICATE") && documentId ? <button className="admin-danger" type="button" onClick={archive} disabled={busy}>Arsipkan</button> : null}</div><p aria-live="polite">{message}</p></form>;
+  const serviceContent = initial?.content as
+    | Record<
+        "id" | "en",
+        { title?: string; description?: string; scope?: string[]; deliverables?: string[] }
+      >
+    | undefined;
+  const certificateContent = initial?.content as
+    Record<"id" | "en", { title?: string; issuer?: string }> | undefined;
+  return (
+    <form className="admin-callout admin-editor" action={submit}>
+      {kind === "PROFILE" ? (
+        <>
+          <div className="admin-form-grid">
+            <label>
+              Nama
+              <input name="name" defaultValue={field("name")} required />
+            </label>
+            <label>
+              Peran
+              <input name="role" defaultValue={field("role")} required />
+            </label>
+            <label>
+              Lokasi
+              <input name="location" defaultValue={field("location")} />
+            </label>
+            <label>
+              Email
+              <input name="email" type="email" defaultValue={field("email")} required />
+            </label>
+            <label>
+              Instagram
+              <input
+                name="instagram"
+                type="url"
+                defaultValue={links.find((link) => link.label === "Instagram")?.href}
+              />
+            </label>
+            <label>
+              LinkedIn
+              <input
+                name="linkedin"
+                type="url"
+                defaultValue={links.find((link) => link.label === "LinkedIn")?.href}
+              />
+            </label>
+          </div>
+          <label>
+            Intro
+            <textarea name="intro" defaultValue={field("intro")} />
+          </label>
+          <label>
+            Ketersediaan
+            <input name="availability" defaultValue={field("availability")} />
+          </label>
+          <label>
+            Foto profil
+            <select name="portraitMediaId" defaultValue={field("portraitMediaId")}>
+              <option value="">Gunakan foto lokal</option>
+              {media.map((asset) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.alt}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            SEO title
+            <input name="seoTitle" defaultValue={field("seoTitle")} />
+          </label>
+          <label>
+            SEO description
+            <textarea name="seoDescription" defaultValue={field("seoDescription")} />
+          </label>
+        </>
+      ) : kind === "SERVICE" ? (
+        <>
+          <div className="admin-form-grid">
+            <label>
+              Nomor/index
+              <input name="index" defaultValue={field("index")} />
+            </label>
+            <label>
+              Urutan
+              <input
+                name="sortOrder"
+                type="number"
+                defaultValue={Number(initial?.sortOrder ?? 0)}
+              />
+            </label>
+          </div>
+          {(["id", "en"] as const).map((locale) => {
+            const value = serviceContent?.[locale];
+            return (
+              <fieldset key={locale}>
+                <legend>{locale === "id" ? "Bahasa Indonesia" : "English"}</legend>
+                <label>
+                  Judul
+                  <input name={`${locale}Title`} defaultValue={value?.title} required />
+                </label>
+                <label>
+                  Deskripsi
+                  <textarea
+                    name={`${locale}Description`}
+                    defaultValue={value?.description}
+                    required
+                  />
+                </label>
+                <label>
+                  Scope — satu per baris
+                  <textarea name={`${locale}Scope`} defaultValue={value?.scope?.join("\n")} />
+                </label>
+                <label>
+                  Deliverables — satu per baris
+                  <textarea
+                    name={`${locale}Deliverables`}
+                    defaultValue={value?.deliverables?.join("\n")}
+                  />
+                </label>
+              </fieldset>
+            );
+          })}
+          <label className="admin-check">
+            <input type="checkbox" name="visible" defaultChecked={initial?.visible !== false} />{" "}
+            Tampilkan di situs
+          </label>
+        </>
+      ) : kind === "CERTIFICATE" ? (
+        <>
+          <input type="hidden" name="credentialMediaId" value={field("credentialMediaId")} />
+          <div className="admin-form-grid">
+            <label>
+              Tahun
+              <input name="year" defaultValue={field("year")} />
+            </label>
+            <label>
+              Urutan
+              <input
+                name="sortOrder"
+                type="number"
+                defaultValue={Number(initial?.sortOrder ?? 0)}
+              />
+            </label>
+          </div>
+          <label>
+            Gambar dari media
+            <select name="imageMediaId" defaultValue={field("imageMediaId")}>
+              <option value="">Gunakan path gambar di bawah</option>
+              {media.map((asset) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.alt}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Path gambar lokal
+            <input
+              name="imageUrl"
+              defaultValue={field("imageUrl")}
+              placeholder="/certificate/previews/nama.jpg"
+            />
+          </label>
+          <label>
+            URL PDF atau kredensial
+            <input
+              name="credentialUrl"
+              defaultValue={field("credentialUrl")}
+              placeholder="https://… atau /certificate/nama.pdf"
+            />
+          </label>
+          {(["id", "en"] as const).map((locale) => {
+            const value = certificateContent?.[locale];
+            return (
+              <fieldset key={locale}>
+                <legend>{locale === "id" ? "Bahasa Indonesia" : "English"}</legend>
+                <label>
+                  Judul
+                  <input name={`${locale}Title`} defaultValue={value?.title} required />
+                </label>
+                <label>
+                  Penerbit
+                  <input name={`${locale}Issuer`} defaultValue={value?.issuer} />
+                </label>
+              </fieldset>
+            );
+          })}
+          <label className="admin-check">
+            <input type="checkbox" name="visible" defaultChecked={initial?.visible !== false} />{" "}
+            Tampilkan di situs
+          </label>
+        </>
+      ) : (
+        <>
+          <div className="admin-form-grid">
+            <label>
+              Nama situs
+              <input name="siteName" defaultValue={field("siteName")} required />
+            </label>
+            <label>
+              URL situs
+              <input name="siteUrl" type="url" defaultValue={field("siteUrl")} required />
+            </label>
+            <label>
+              Default title
+              <input name="defaultTitle" defaultValue={field("defaultTitle")} />
+            </label>
+            <label>
+              Copyright
+              <input name="copyrightText" defaultValue={field("copyrightText")} />
+            </label>
+          </div>
+          <label>
+            Default description
+            <textarea name="defaultDescription" defaultValue={field("defaultDescription")} />
+          </label>
+          <label>
+            OG image
+            <select name="ogImageMediaId" defaultValue={field("ogImageMediaId")}>
+              <option value="">Belum dipilih</option>
+              {media.map((asset) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.alt}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="admin-check">
+            <input
+              type="checkbox"
+              name="analyticsEnabled"
+              defaultChecked={initial?.analyticsEnabled === true}
+            />{" "}
+            Aktifkan analytics
+          </label>
+        </>
+      )}
+      <div className="admin-actions">
+        <button className="button button-outline" name="intent" value="draft" disabled={busy}>
+          Simpan draft
+        </button>
+        <button className="button button-light" name="intent" value="publish" disabled={busy}>
+          {busy ? "Memproses…" : "Simpan & terbitkan"}
+        </button>
+        {(kind === "SERVICE" || kind === "CERTIFICATE") && documentId ? (
+          <button className="admin-danger" type="button" onClick={archive} disabled={busy}>
+            Arsipkan
+          </button>
+        ) : null}
+      </div>
+      <p aria-live="polite">{message}</p>
+    </form>
+  );
 }

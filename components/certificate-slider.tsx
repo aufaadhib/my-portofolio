@@ -10,10 +10,22 @@ type Certificate = {
 };
 
 /** Renders an accessible native horizontal gallery for certificate documents. */
-export function CertificateSlider({ certificates, locale, homeMotion = true }: { certificates: Certificate[]; locale: "id" | "en"; homeMotion?: boolean }) {
+export function CertificateSlider({
+  certificates,
+  locale,
+  homeMotion = true,
+}: {
+  certificates: Certificate[];
+  locale: "id" | "en";
+  homeMotion?: boolean;
+}) {
   const track = useRef<HTMLDivElement>(null);
   const drag = useRef({ startX: 0, scrollLeft: 0, moved: false });
-  const move = (direction: -1 | 1) => track.current?.scrollBy({ left: direction * track.current.clientWidth * .78, behavior: "smooth" });
+  const move = (direction: -1 | 1) =>
+    track.current?.scrollBy({
+      left: direction * track.current.clientWidth * 0.78,
+      behavior: "smooth",
+    });
   const startDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "mouse" || event.button !== 0) return;
     const element = track.current;
@@ -34,21 +46,68 @@ export function CertificateSlider({ certificates, locale, homeMotion = true }: {
     if (!element?.hasPointerCapture(event.pointerId)) return;
     element.releasePointerCapture(event.pointerId);
     element.classList.remove("is-dragging");
-    setTimeout(() => { drag.current.moved = false; });
+    setTimeout(() => {
+      drag.current.moved = false;
+    });
   };
 
-  return <section className="certificate-gallery" aria-label={locale === "en" ? "Certificates" : "Sertifikat"} data-home-certificates={homeMotion ? true : undefined} data-reveal={homeMotion ? undefined : true}>
-    <div className="certificate-toolbar">
-      <p className="eyebrow">{locale === "en" ? "Certificates" : "Sertifikat"}</p>
-      <div className="certificate-controls">
-        <button type="button" onClick={() => move(-1)} aria-label={locale === "en" ? "Previous certificates" : "Sertifikat sebelumnya"}>←</button>
-        <button type="button" onClick={() => move(1)} aria-label={locale === "en" ? "Next certificates" : "Sertifikat berikutnya"}>→</button>
+  return (
+    <section
+      className="certificate-gallery"
+      aria-label={locale === "en" ? "Certificates" : "Sertifikat"}
+      data-home-certificates={homeMotion ? true : undefined}
+      data-reveal={homeMotion ? undefined : true}
+    >
+      <div className="certificate-toolbar">
+        <p className="eyebrow">{locale === "en" ? "Certificates" : "Sertifikat"}</p>
+        <div className="certificate-controls">
+          <button
+            type="button"
+            onClick={() => move(-1)}
+            aria-label={locale === "en" ? "Previous certificates" : "Sertifikat sebelumnya"}
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            onClick={() => move(1)}
+            aria-label={locale === "en" ? "Next certificates" : "Sertifikat berikutnya"}
+          >
+            →
+          </button>
+        </div>
       </div>
-    </div>
-    <div className="certificate-track" ref={track} tabIndex={0} onPointerDown={startDrag} onPointerMove={updateDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} onClickCapture={(event) => { if (drag.current.moved) event.preventDefault(); }}>
-      {certificates.map((certificate) => <a key={certificate.document} className="certificate-card" href={certificate.document} target="_blank" rel="noreferrer" aria-label={`${certificate.title} (${locale === "en" ? "open PDF" : "buka PDF"})`} data-home-certificate={homeMotion ? true : undefined}>
-        <Image src={certificate.image} alt={certificate.title} fill sizes="(max-width: 800px) 82vw, (max-width: 1200px) 46vw, 520px" />
-      </a>)}
-    </div>
-  </section>;
+      <div
+        className="certificate-track"
+        ref={track}
+        tabIndex={0}
+        onPointerDown={startDrag}
+        onPointerMove={updateDrag}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
+        onClickCapture={(event) => {
+          if (drag.current.moved) event.preventDefault();
+        }}
+      >
+        {certificates.map((certificate) => (
+          <a
+            key={certificate.document}
+            className="certificate-card"
+            href={certificate.document}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${certificate.title} (${locale === "en" ? "open PDF" : "buka PDF"})`}
+            data-home-certificate={homeMotion ? true : undefined}
+          >
+            <Image
+              src={certificate.image}
+              alt={certificate.title}
+              fill
+              sizes="(max-width: 800px) 82vw, (max-width: 1200px) 46vw, 520px"
+            />
+          </a>
+        ))}
+      </div>
+    </section>
+  );
 }

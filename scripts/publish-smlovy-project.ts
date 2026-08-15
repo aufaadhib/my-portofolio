@@ -9,62 +9,52 @@ import { projectPayloadSchema } from "../lib/validation/cms";
 neonConfig.webSocketConstructor = ws;
 
 const payload = projectPayloadSchema.parse({
-  slug: "glutong-pos",
+  slug: "smlovy-rent",
   year: "2026",
+  stack: ["Next.js", "React", "Tailwind CSS", "Vercel"],
   featured: true,
-  sortOrder: 1,
-  stack: [
-    "Next.js 16",
-    "React 19",
-    "TypeScript",
-    "Tailwind CSS 4",
-    "Prisma 7",
-    "PostgreSQL",
-    "Better Auth",
-    "Vercel Blob",
-  ],
+  sortOrder: 3,
   heroMediaId: null,
   galleryMediaIds: [],
-  liveUrl: "https://glutong.vercel.app/pos",
+  liveUrl: "https://smlovy.vercel.app/",
   repositoryUrl: null,
   content: {
     id: {
-      title: "Glutong POS",
-      category: "Aplikasi Point of Sale",
+      title: "SMLovy Rent",
+      category: "Pengembangan Website Rental",
       role: "Pengembang Web Full-Stack",
       summary:
-        "Platform POS multi-outlet untuk operasional kafe dan restoran, menghubungkan transaksi kasir, pesanan dapur, katalog, laporan, shift, dan manajemen tenaga kerja dalam satu sistem responsif.",
+        "Website rental PlayStation di Banyuwangi yang memudahkan pelanggan memilih unit PS3, PS4, atau PS5, memahami harga harian, dan menghubungi admin melalui WhatsApp.",
       body: [
         {
           type: "paragraph",
-          text: "Glutong POS merupakan platform operasional kafe dan restoran yang dirancang untuk melayani kebutuhan kasir, manajer, dan pemilik. Saya mengembangkan sistem full-stack yang mencakup katalog serta harga per outlet, transaksi dan open order, antrean dapur, pembayaran, shift kas, laporan operasional, pengaturan struk, dan rekonsiliasi platform delivery. Sistem juga dilengkapi kontrol akses berbasis peran serta modul absensi wajah dan lokasi, roster staf, dan audit perubahan untuk menjaga alur kerja tetap terkontrol.",
+          text: "SMLovy Rent adalah landing page rental PlayStation yang dirancang untuk membuat proses memilih sesi bermain terasa lebih sederhana. Halaman ini menampilkan keunggulan layanan, pilihan unit PlayStation 3, PlayStation 4, dan PlayStation 5 beserta harga per hari, alur sewa tiga langkah mulai dari memilih unit hingga konfirmasi detail, serta CTA WhatsApp untuk melanjutkan percakapan dengan admin. Struktur responsifnya menjaga informasi utama tetap mudah ditemukan di perangkat mobile maupun desktop.",
         },
       ],
-      seoTitle: "Glutong POS - Platform Operasional Kafe dan Restoran",
+      seoTitle: "SMLovy Rent - Website Rental PlayStation Banyuwangi",
       seoDescription:
-        "Pengembangan full-stack aplikasi POS multi-outlet dengan transaksi kasir, kitchen ticket, laporan, shift, katalog, dan manajemen tenaga kerja.",
+        "Pengembangan website rental PlayStation SMLovy di Banyuwangi dengan katalog unit PS3, PS4, PS5, informasi harga harian, alur sewa, dan CTA WhatsApp.",
     },
     en: {
-      title: "Glutong POS",
-      category: "Point of Sale Application",
+      title: "SMLovy Rent",
+      category: "Rental Website Development",
       role: "Full-Stack Web Developer",
       summary:
-        "A multi-outlet POS platform for cafés and restaurants, connecting checkout, kitchen orders, catalogs, reporting, shifts, and workforce operations in one responsive system.",
+        "A Banyuwangi-based PlayStation rental website that helps customers choose PS3, PS4, or PS5 units, understand daily pricing, and contact the admin through WhatsApp.",
       body: [
         {
           type: "paragraph",
-          text: "Glutong POS is an operations platform built for café and restaurant cashiers, managers, and owners. I developed the full-stack system covering outlet-specific catalogs and pricing, transactions and open orders, kitchen queues, payments, cash shifts, operational reports, receipt settings, and delivery-platform reconciliation. The system also includes role-based access control, face-and-location attendance, staff rosters, and audit trails to keep daily operations controlled and traceable.",
+          text: "SMLovy Rent is a PlayStation rental landing page designed to make choosing the next gaming session feel simpler. It presents the service benefits, PlayStation 3, PlayStation 4, and PlayStation 5 rental units with daily pricing, a three-step rental flow from choosing a unit to confirming the details, and WhatsApp CTAs for continuing the conversation with the admin. Its responsive structure keeps the essential information easy to find on both mobile and desktop.",
         },
       ],
-      seoTitle: "Glutong POS - Café and Restaurant Operations Platform",
+      seoTitle: "SMLovy Rent - PlayStation Rental Website in Banyuwangi",
       seoDescription:
-        "Full-stack development of a multi-outlet POS application with checkout, kitchen tickets, reporting, shifts, catalogs, and workforce management.",
+        "Development of SMLovy's PlayStation rental website in Banyuwangi with PS3, PS4, and PS5 units, daily pricing, rental steps, and WhatsApp CTAs.",
     },
   },
 });
 
-/** Publishes an idempotent CMS revision for the approved Glutong POS project. */
-async function publishGlutongProject() {
+async function publishProject() {
   const connectionString = process.env.DATABASE_URL;
   const email = process.env.CMS_OWNER_EMAIL?.trim().toLowerCase();
   if (!connectionString || !email) throw new Error("DATABASE_URL and CMS_OWNER_EMAIL are required");
@@ -106,7 +96,7 @@ async function publishGlutongProject() {
           action: "publish_project",
           entityType: "ContentRevision",
           entityId: revision.id,
-          metadata: { kind: "PROJECT", slug: payload.slug },
+          metadata: { kind: "PROJECT", slug: payload.slug, source: "https://smlovy.vercel.app/" },
         },
       });
       return {
@@ -121,7 +111,7 @@ async function publishGlutongProject() {
   }
 }
 
-publishGlutongProject()
+publishProject()
   .then((result) => console.log(JSON.stringify(result)))
   .catch((error) => {
     console.error(error);

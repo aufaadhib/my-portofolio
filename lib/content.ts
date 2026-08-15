@@ -9,6 +9,8 @@ export type Project = {
   stack: string[];
   accent: string;
   description: string;
+  featured?: boolean;
+  sortOrder?: number;
   liveUrl?: string | null;
   repositoryUrl?: string | null;
   heroImage?: { url: string; alt: string; width?: number; height?: number };
@@ -61,7 +63,8 @@ export const projects: Project[] = [
     title: "Proyek ketiga",
     category: "Build · konten Anda diperlukan",
     year: "Tahun",
-    summary: "Pilih karya yang memperlihatkan kualitas, rasa ingin tahu, atau kedalaman teknis Anda.",
+    summary:
+      "Pilih karya yang memperlihatkan kualitas, rasa ingin tahu, atau kedalaman teknis Anda.",
     role: "Peran Anda dalam proyek",
     stack: ["Web", "UX", "Performance"],
     accent: "lime",
@@ -74,16 +77,19 @@ export const services = [
   {
     index: "S.01",
     title: "Aplikasi web modern",
-    description: "Membangun website dan aplikasi web yang responsif, cepat, serta terhubung dengan kebutuhan bisnis dan pengguna.",
+    description:
+      "Membangun website dan aplikasi web yang responsif, cepat, serta terhubung dengan kebutuhan bisnis dan pengguna.",
   },
   {
     index: "S.02",
     title: "Aplikasi mobile",
-    description: "Mengembangkan pengalaman mobile yang fungsional dan nyaman digunakan untuk kebutuhan Android maupun iOS.",
+    description:
+      "Mengembangkan pengalaman mobile yang fungsional dan nyaman digunakan untuk kebutuhan Android maupun iOS.",
   },
   {
     index: "S.03",
     title: "Backend dan integrasi",
-    description: "Menangani API, database, autentikasi, dan integrasi layanan agar aplikasi bekerja secara utuh dari depan hingga belakang.",
+    description:
+      "Menangani API, database, autentikasi, dan integrasi layanan agar aplikasi bekerja secara utuh dari depan hingga belakang.",
   },
 ];
