@@ -10,6 +10,22 @@ import type { Locale } from "@/lib/i18n";
 
 const colors: Record<string, string> = { cyan: "#7bd5da", amber: "#e9a04b", lime: "#c7d66e" };
 
+function coverTexture(texture: THREE.Texture, targetAspect: number) {
+  const image = texture.image as { width?: number; height?: number } | undefined;
+  if (!image?.width || !image.height) return;
+  const imageAspect = image.width / image.height;
+  if (imageAspect > targetAspect) {
+    const visibleWidth = targetAspect / imageAspect;
+    texture.repeat.set(visibleWidth, 1);
+    texture.offset.set((1 - visibleWidth) / 2, 0);
+  } else {
+    const visibleHeight = imageAspect / targetAspect;
+    texture.repeat.set(1, visibleHeight);
+    texture.offset.set(0, (1 - visibleHeight) / 2);
+  }
+  texture.needsUpdate = true;
+}
+
 function fallbackTexture(project: Project, light: boolean) {
   const canvas = document.createElement("canvas"); canvas.width = 1024; canvas.height = 768;
   const context = canvas.getContext("2d")!; const accent = colors[project.accent] ?? colors.cyan;
@@ -36,23 +52,22 @@ export default function ProjectRotunda({ projects, locale = "id" }: { projects: 
     const host = mount.current; if (!host) return;
     const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(38, 1, .1, 100); camera.position.set(0, .15, 9.4);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" }); renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.outputColorSpace = THREE.SRGBColorSpace; host.appendChild(renderer.domElement);
-    const group = new THREE.Group(); scene.add(group); const geometry = new THREE.PlaneGeometry(4.2, 3.15); const light = document.documentElement.dataset.theme === "light"; const textures = projects.map((project) => fallbackTexture(project, light)); const loadedTextures: THREE.Texture[] = [];
+    const group = new THREE.Group(); scene.add(group); const frameWidth = 4.2; const frameHeight = 3.15; const frameAspect = frameWidth / frameHeight; const geometry = new THREE.PlaneGeometry(frameWidth, frameHeight); const light = document.documentElement.dataset.theme === "light"; const textures = projects.map((project) => fallbackTexture(project, light)); const loadedTextures: THREE.Texture[] = [];
     const meshes = textures.map((texture, index) => { const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: .94, side: THREE.FrontSide }); const mesh = new THREE.Mesh(geometry, material); mesh.userData.index = index; group.add(mesh); return mesh; });
-    const loader = new THREE.TextureLoader(); projects.forEach((project, index) => { if (!project.heroImage) return; loader.load(project.heroImage.url, (texture) => { texture.colorSpace = THREE.SRGBColorSpace; loadedTextures.push(texture); const material = meshes[index].material as THREE.MeshBasicMaterial; material.map = texture; material.needsUpdate = true; }); });
+    const loader = new THREE.TextureLoader(); projects.forEach((project, index) => { if (!project.heroImage) return; loader.load(project.heroImage.url, (texture) => { texture.colorSpace = THREE.SRGBColorSpace; coverTexture(texture, frameAspect); loadedTextures.push(texture); const material = meshes[index].material as THREE.MeshBasicMaterial; material.map = texture; material.needsUpdate = true; }); });
     const step = Math.PI * 2 / projects.length; const radius = Math.max(5.2, projects.length * 1.05);
     meshes.forEach((mesh, index) => { const angle = index * step; mesh.position.set(Math.sin(angle) * radius, 0, Math.cos(angle) * radius); mesh.rotation.y = angle; });
-    let target = 0, current = 0, frame = 0, visible = true, dragging = false, startX = 0, startTarget = 0, wheelLocked = false; const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
+    let target = 0, current = 0, frame = 0, visible = true, dragging = false, startX = 0, startTarget = 0; const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
     const resize = () => { const width = host.clientWidth, height = host.clientHeight; renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix(); }; resize();
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: .05 }); observer.observe(host);
     const render = () => { frame = requestAnimationFrame(render); if (!visible || document.hidden) return; target = -activeRef.current * step; current += (target - current) * .09; group.rotation.y = current; renderer.render(scene, camera); }; render();
-    const wheel = (event: WheelEvent) => { if (Math.abs(event.deltaY) < 12 || wheelLocked) return; event.preventDefault(); wheelLocked = true; select(event.deltaY > 0 ? 1 : -1); setTimeout(() => { wheelLocked = false; }, 420); };
     const down = (event: PointerEvent) => { dragging = true; startX = event.clientX; startTarget = activeRef.current; renderer.domElement.setPointerCapture(event.pointerId); };
     const move = (event: PointerEvent) => { if (!dragging) return; const next = Math.round(startTarget - (event.clientX - startX) / 170); activeRef.current = (next % projects.length + projects.length) % projects.length; setActive(activeRef.current); };
     const up = (event: PointerEvent) => { if (Math.abs(event.clientX - startX) < 6) { const bounds = renderer.domElement.getBoundingClientRect(); pointer.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -((event.clientY - bounds.top) / bounds.height) * 2 + 1); raycaster.setFromCamera(pointer, camera); const hit = raycaster.intersectObjects(meshes)[0]?.object as THREE.Mesh | undefined; const index = hit?.userData.index as number | undefined; if (index === activeRef.current) navigate(`/proyek/${projects[index].slug}`); else if (index !== undefined) { activeRef.current = index; setActive(index); } } dragging = false; };
     const key = (event: KeyboardEvent) => { if (event.key === "ArrowRight") { event.preventDefault(); select(1); } if (event.key === "ArrowLeft") { event.preventDefault(); select(-1); } if (event.key === "Enter") navigate(`/proyek/${projects[activeRef.current].slug}`); };
-    renderer.domElement.addEventListener("wheel", wheel, { passive: false }); renderer.domElement.addEventListener("pointerdown", down); renderer.domElement.addEventListener("pointermove", move); renderer.domElement.addEventListener("pointerup", up); renderer.domElement.addEventListener("pointercancel", up); host.addEventListener("keydown", key); window.addEventListener("resize", resize);
+    renderer.domElement.addEventListener("pointerdown", down); renderer.domElement.addEventListener("pointermove", move); renderer.domElement.addEventListener("pointerup", up); renderer.domElement.addEventListener("pointercancel", up); host.addEventListener("keydown", key); window.addEventListener("resize", resize);
     gsap.from(renderer.domElement, { autoAlpha: 0, scale: .92, duration: 1, ease: "power3.out" });
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener("resize", resize); host.removeEventListener("keydown", key); renderer.domElement.removeEventListener("wheel", wheel); renderer.domElement.removeEventListener("pointerdown", down); renderer.domElement.removeEventListener("pointermove", move); renderer.domElement.removeEventListener("pointerup", up); renderer.domElement.removeEventListener("pointercancel", up); textures.forEach((texture) => texture.dispose()); loadedTextures.forEach((texture) => texture.dispose()); meshes.forEach((mesh) => (mesh.material as THREE.Material).dispose()); geometry.dispose(); renderer.dispose(); renderer.domElement.remove(); };
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener("resize", resize); host.removeEventListener("keydown", key); renderer.domElement.removeEventListener("pointerdown", down); renderer.domElement.removeEventListener("pointermove", move); renderer.domElement.removeEventListener("pointerup", up); renderer.domElement.removeEventListener("pointercancel", up); textures.forEach((texture) => texture.dispose()); loadedTextures.forEach((texture) => texture.dispose()); meshes.forEach((mesh) => (mesh.material as THREE.Material).dispose()); geometry.dispose(); renderer.dispose(); renderer.domElement.remove(); };
   }, [navigate, projects, select]);
 
   const project = projects[active];
