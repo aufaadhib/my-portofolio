@@ -120,6 +120,7 @@ export default function ProjectEditor({
             </option>
           ))}
         </select>
+        <small className="admin-meta">Standar gambar proyek: 1920 × 1080 px (16:9).</small>
       </label>
       {(["id", "en"] as const).map((locale) => {
         const value = initial?.content[locale];

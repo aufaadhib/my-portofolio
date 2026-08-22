@@ -28,27 +28,27 @@ function coverTexture(texture: THREE.Texture, targetAspect: number) {
 
 function fallbackTexture(project: Project, light: boolean) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 768;
+  canvas.width = 1280;
+  canvas.height = 720;
   const context = canvas.getContext("2d")!;
   const accent = colors[project.accent] ?? colors.cyan;
   context.fillStyle = light ? "#deddd7" : "#151918";
-  context.fillRect(0, 0, 1024, 768);
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = accent;
   context.lineWidth = 2;
-  context.strokeRect(74, 74, 876, 620);
+  context.strokeRect(80, 64, 1120, 592);
   context.save();
-  context.translate(512, 384);
+  context.translate(640, 360);
   context.rotate(Math.PI / 4);
   context.strokeRect(-150, -150, 300, 300);
   context.restore();
   context.fillStyle = accent;
   context.font = "500 190px Arial";
   context.textAlign = "center";
-  context.fillText(project.index, 512, 450);
+  context.fillText(project.index, 640, 430);
   context.fillStyle = light ? "#111312" : "#f1f0eb";
   context.font = "500 42px Arial";
-  context.fillText(project.title.toUpperCase(), 512, 660);
+  context.fillText(project.title.toUpperCase(), 640, 650);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -98,7 +98,7 @@ export default function ProjectRotunda({
     if (!host) return;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-    camera.position.set(0, 0.15, 9.4);
+    camera.position.set(0, 0, 9.4);
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -110,7 +110,7 @@ export default function ProjectRotunda({
     const group = new THREE.Group();
     scene.add(group);
     const frameWidth = 4.2;
-    const frameHeight = 3.15;
+    const frameHeight = frameWidth * (9 / 16);
     const frameAspect = frameWidth / frameHeight;
     const geometry = new THREE.PlaneGeometry(frameWidth, frameHeight);
     const light = document.documentElement.dataset.theme === "light";
@@ -161,6 +161,13 @@ export default function ProjectRotunda({
         height = host.clientHeight;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
+      const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+      const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+      const fitDistance = Math.max(
+        frameHeight / (2 * Math.tan(verticalFov / 2)),
+        frameWidth / (2 * Math.tan(horizontalFov / 2)),
+      );
+      camera.position.z = radius + fitDistance * 1.01;
       camera.updateProjectionMatrix();
     };
     resize();
